@@ -95,4 +95,6 @@ echo 'Ersetzte X-Werte: ' . $anzahlX . "\n\n";
 
 // Hinweis: print_r() zeigt null als leeren Wert an ("=> ").
 // var_dump() würde es als NULL anzeigen.
-print_r($transformiert);
+//print_r($transformiert);
+
+return $transformiert;

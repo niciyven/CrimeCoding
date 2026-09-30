@@ -152,7 +152,7 @@ if (!isset($nurLaden)) {
 
     // Alle Datensätze vollständig ausgeben
     echo "\nAlle Datensätze:\n";
-    print_r($daten);
+    //print_r($daten);
 }
 
 // Das fertige Array an die Datei zurückgeben, die extract.php lädt
