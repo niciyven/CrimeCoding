@@ -1,10 +1,40 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="de">
+
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>CrimeCoding</title>
+
+    <!-- Unser Design -->
+    <link rel="stylesheet" href="style.css">
+
+    <!-- Chart.js für Diagramme -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
+
 <body>
+
+<header>
+    <h1>CrimeCoding</h1>
+    <p>Sexualisierte Gewalt in der Schweiz 2025</p>
+</header>
+
+<main>
+
+    <section>
+        <h2>Welche Delikte wurden 2025 erfasst?</h2>
+
+        <div class="chart-container">
+            <canvas id="delikteChart"></canvas>
+        </div>
+    </section>
+
+</main>
+
+<!-- Unsere Funktionen -->
+<script src="scripts.js"></script>
 
 </body>
 </html>
