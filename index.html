@@ -7,11 +7,7 @@
 
     <title>CrimeCoding</title>
 
-    <!-- Unser Design -->
     <link rel="stylesheet" href="style.css">
-
-    <!-- Chart.js für Diagramme -->
-    <script src="script.js"></script>
 </head>
 
 <body>
@@ -23,6 +19,7 @@
 
 <main>
 
+    <!-- GRAFIK 1 -->
     <section>
         <h2>Welche Delikte wurden 2025 erfasst?</h2>
 
@@ -31,10 +28,25 @@
         </div>
     </section>
 
+
+    <!-- GRAFIK 2 -->
+    <section>
+        <h2>Wie verteilen sich Vergewaltigungen nach Alter?</h2>
+
+        <div class="chart-container">
+            <canvas id="ageChart"></canvas>
+        </div>
+    </section>
+
 </main>
 
-<!-- Unsere Funktionen -->
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- Unser JavaScript -->
 <script src="script.js"></script>
 
 </body>
+
 </html>
