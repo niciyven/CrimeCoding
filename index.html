@@ -5,40 +5,307 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>CrimeCoding</title>
+    <title>Case Files – Der Fall Untersiggenthal</title>
+
+    <!-- Schriften: Schreibmaschine + Stempel-Look -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&family=Special+Elite&family=Oswald:wght@500;700&display=swap" rel="stylesheet">
 
     <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-<header>
-    <h1>CrimeCoding</h1>
-    <p>Sexualisierte Gewalt in der Schweiz 2025</p>
+<!-- =====================================================
+     NAVIGATION
+     ===================================================== -->
+<nav class="nav">
+    <ul>
+        <li><a href="#top" class="aktiv">Case Files</a></li>
+        <li><a href="#fall">Der Fall</a></li>
+        <li><a href="#zahlen">Statistik</a></li>
+        <li><a href="#anklage">Anklage</a></li>
+        <li><a href="#alter">Hintergrund</a></li>
+    </ul>
+    <span class="nav-burger" aria-hidden="true"></span>
+</nav>
+
+
+<!-- =====================================================
+     HERO – CASE FILE 001
+     ===================================================== -->
+<header class="hero" id="top">
+
+    <div class="hero-karte papier">
+        <p class="kicker">Case File 001</p>
+        <h1>Untersiggen&shy;thal</h1>
+        <p class="lead">
+            Über zwölf Jahre lang soll ein ehemaliger Aargauer SVP-Grossrat
+            seine Ehefrau betäubt und missbraucht haben – 140 Mal.
+            Später traf es eine neue Partnerin und deren minderjährige Tochter.
+            Die Staatsanwaltschaft fordert lebenslänglich.
+        </p>
+        <p class="stempel">Es gilt die<br>Unschuldsvermutung.</p>
+    </div>
+
+    <!-- Fotowand: Bilder in den Ordner img/ legen.
+         Fehlt ein Bild, erscheint automatisch eine dunkle Fläche. -->
+    <div class="fotowand">
+        <figure class="foto foto--portrait" style="--bild: url('img/portrait.jpg');">
+            <span class="zensur" aria-hidden="true"></span>
+            <figcaption>Der Beschuldigte, 57 – anonymisiert</figcaption>
+        </figure>
+
+        <figure class="foto foto--ort" style="--bild: url('img/untersiggenthal.jpg');">
+            <figcaption>Untersiggenthal AG</figcaption>
+        </figure>
+
+        <figure class="foto foto--nacht" style="--bild: url('img/nacht.jpg');">
+            <figcaption>Tatzeit: nachts</figcaption>
+        </figure>
+
+        <figure class="foto foto--beweis" style="--bild: url('img/fingerabdruck.jpg');">
+            <figcaption>Beweisstück</figcaption>
+        </figure>
+    </div>
+
+    <a href="#fall" class="scroll-hinweis">Akte öffnen ↓</a>
 </header>
+
 
 <main>
 
-    <!-- GRAFIK 1 -->
-    <section>
-        <h2>Welche Delikte wurden 2025 erfasst?</h2>
+    <!-- =================================================
+         01 – DER FALL
+         ================================================= -->
+    <section class="kapitel" id="fall">
 
-        <div class="chart-container">
-            <canvas id="delikteChart"></canvas>
+        <div class="kapitel-kopf">
+            <span class="nummer">01</span>
+            <h2>Der Fall</h2>
+            <p>
+                Was die Anklageschrift, die SRF vorliegt, dem
+                heute 57-jährigen Ex-Politiker vorwirft.
+            </p>
+        </div>
+
+        <div class="kapitel-inhalt">
+
+            <ol class="zeitstrahl">
+                <li>
+                    <span class="datum">Dez 2008 – Aug 2021</span>
+                    <p>140 mutmassliche Übergriffe an der eigenen Ehefrau – bis zur Trennung.</p>
+                </li>
+                <li>
+                    <span class="datum">Sommer 2022</span>
+                    <p>Eine Polin und ihre Tochter ziehen bei ihm ein.</p>
+                </li>
+                <li>
+                    <span class="datum">2023</span>
+                    <p>Nach 44 weiteren Übergriffen: Verhaftung. Seither U-Haft.</p>
+                </li>
+                <li>
+                    <span class="datum">Juli 2026</span>
+                    <p>Anklage. Antrag: lebenslängliche Freiheitsstrafe.</p>
+                </li>
+            </ol>
+
+            <div class="text-spalte">
+                <p class="initial">
+                    Es ist ein Martyrium, das sich hinter verschlossenen Türen
+                    in einem Einfamilienhaus im Aargau abgespielt haben soll.
+                    Nacht für Nacht, über mehr als zwölf Jahre. Die Frau, die
+                    es erleiden musste, ahnte lange nichts davon – sie war
+                    jeweils betäubt.
+                </p>
+                <p>
+                    Laut Anklage mischte ihr damaliger Ehemann ihr heimlich
+                    <strong>GHB oder GBL</strong> bei – Substanzen, die als
+                    Party- und Vergewaltigungsdrogen bekannt sind. Betäubungs-
+                    und Schlafmittel soll er in grossen Mengen übers Internet
+                    bestellt haben, mutmasslich aus Kambodscha. Die Übergriffe
+                    soll er gefilmt haben.
+                </p>
+                <p>
+                    Lange war in den Medien vor allem von zwei Opfern die Rede:
+                    einer Frau aus Polen, die er in den Ferien in Spanien
+                    kennengelernt hatte, und ihrer minderjährigen Tochter.
+                    Erst mit der Anklageschrift wurde klar, dass das
+                    <strong>Hauptopfer seine Ex-Frau</strong> ist.
+                </p>
+            </div>
+
+            <blockquote class="notiz papier">
+                Die Ex-Frau leidet laut Anklage bis heute an einer
+                posttraumatischen Belastungsstörung. Ihren Beruf kann sie
+                nicht mehr ausüben.
+            </blockquote>
         </div>
     </section>
 
 
-    <!-- GRAFIK 2 -->
-    <section>
-        <h2>Wie verteilen sich Vergewaltigungen nach Alter?</h2>
+    <!-- =================================================
+         02 – GRAFIK 1 (früh im Text)
+         ================================================= -->
+    <section class="kapitel" id="zahlen">
 
-        <div class="chart-container">
-            <canvas id="ageChart"></canvas>
+        <div class="kapitel-kopf">
+            <span class="nummer">02</span>
+            <h2>Kein Einzelfall</h2>
+            <p>
+                Der Fall Untersiggenthal ist extrem. Doch sexualisierte
+                Gewalt ist in der Schweiz Alltag – das zeigt die
+                Polizeiliche Kriminalstatistik 2025.
+            </p>
+        </div>
+
+        <div class="kapitel-inhalt">
+            <div class="beweis-tafel">
+                <p class="tafel-titel">Geschädigte Personen nach Straftatbestand</p>
+                <p class="tafel-unter">Schweiz, 2025 · nach Geschlecht</p>
+
+                <div class="chart-container chart-container--hoch">
+                    <canvas id="delikteChart"></canvas>
+                </div>
+            </div>
+
+            <p class="text-spalte">
+                Die Grafik zeigt: Bei fast allen Straftatbeständen sind
+                <strong>deutlich mehr Frauen als Männer</strong> betroffen.
+                Die Zahlen bilden nur ab, was der Polizei gemeldet wurde –
+                das Dunkelfeld dürfte um ein Vielfaches grösser sein.
+                Gerade Taten unter Betäubung bleiben oft unentdeckt, weil
+                sich die Opfer an nichts erinnern.
+            </p>
         </div>
     </section>
+
+
+    <!-- =================================================
+         03 – DIE ANKLAGE
+         ================================================= -->
+    <section class="kapitel" id="anklage">
+
+        <div class="kapitel-kopf">
+            <span class="nummer">03</span>
+            <h2>Die Anklage</h2>
+            <p>
+                Dem ehemaligen Kantonsparlamentarier werden unter
+                anderem folgende Straftatbestände vorgeworfen.
+            </p>
+        </div>
+
+        <div class="kapitel-inhalt anklage-layout">
+
+            <div class="akte papier">
+                <span class="buroklammer" aria-hidden="true"></span>
+                <ol class="anklagepunkte">
+                    <li>Mehrfach versuchter Mord</li>
+                    <li>Mehrfache qualifizierte Vergewaltigung</li>
+                    <li>Mehrfache qualifizierte sexuelle Nötigung</li>
+                    <li>Schändung <small>(Missbrauch widerstandsunfähiger Personen)</small></li>
+                    <li>Mehrfache sexuelle Handlungen mit Kindern</li>
+                </ol>
+            </div>
+
+            <div class="text-spalte">
+                <p>
+                    Warum <strong>versuchter Mord</strong>? Die Staatsanwaltschaft
+                    argumentiert, der Mann habe seine Opfer mit den Sedierungsmitteln
+                    in akute Lebensgefahr gebracht. Schon kleine Mengen können
+                    zu einer Überdosis und einem tödlichen Atemstillstand führen.
+                </p>
+                <p>
+                    Sie fordert eine <strong>lebenslängliche Freiheitsstrafe</strong>.
+                    Der Mann bestreitet die Vorwürfe.
+                </p>
+            </div>
+
+            <div class="fakten">
+                <div class="fakt">
+                    <span class="fakt-zahl">140</span>
+                    <span class="fakt-text">mutmassliche Übergriffe an der Ex-Frau</span>
+                </div>
+                <div class="fakt">
+                    <span class="fakt-zahl">44</span>
+                    <span class="fakt-text">Übergriffe innert eines Jahres, v. a. an der Minderjährigen</span>
+                </div>
+                <div class="fakt">
+                    <span class="fakt-zahl">3</span>
+                    <span class="fakt-text">Opfer laut Anklageschrift</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- =================================================
+         04 – GRAFIK 2 (gegen Schluss)
+         ================================================= -->
+    <section class="kapitel" id="alter">
+
+        <div class="kapitel-kopf">
+            <span class="nummer">04</span>
+            <h2>Wen es trifft</h2>
+            <p>
+                Unsere Hypothese: Bei mindestens jedem zweiten registrierten
+                Sexualdelikt ist die geschädigte Person jünger als 30.
+            </p>
+        </div>
+
+        <div class="kapitel-inhalt">
+
+            <div class="beweis-tafel">
+                <div class="tafel-kopf">
+                    <div>
+                        <p class="tafel-titel">Vergewaltigungen nach Alter der Geschädigten</p>
+                        <p class="tafel-unter">Schweiz, 2025 · männlich und weiblich zusammen</p>
+                    </div>
+                    <div class="grosszahl">
+                        <span id="anteilU30">–</span>
+                        <small>aller Geschädigten von Sexualdelikten<br>waren unter 30 Jahre alt</small>
+                    </div>
+                </div>
+
+                <div class="chart-container">
+                    <canvas id="ageChart"></canvas>
+                </div>
+            </div>
+
+            <p class="text-spalte">
+                Die meisten Opfer von Vergewaltigungen sind jung. Auch im Fall
+                Untersiggenthal war eines der mutmasslichen Opfer noch
+                minderjährig. Ob sich unsere Hypothese bestätigt, zeigt der
+                Wert oben – berechnet aus allen erfassten Sexualdelikten 2025.
+            </p>
+        </div>
+    </section>
+
+
+    <!-- =================================================
+         HILFE
+         ================================================= -->
+    <aside class="hilfe papier">
+        <h2>Hilfe holen</h2>
+        <p>
+            Betroffene von sexualisierter Gewalt erhalten kostenlos und
+            vertraulich Unterstützung bei den kantonalen Opferhilfestellen:
+            <a href="https://www.opferhilfe-schweiz.ch" target="_blank" rel="noopener">opferhilfe-schweiz.ch</a>.
+            Rund um die Uhr erreichbar: Die Dargebotene Hand, Telefon <strong>143</strong>.
+        </p>
+    </aside>
 
 </main>
+
+
+<footer class="footer">
+    <p>
+        Quellen: SRF News (22.07.2026), Bundesamt für Statistik –
+        Polizeiliche Kriminalstatistik 2025
+    </p>
+    <p><strong>Case Files</strong> – ein journalistisches Projekt</p>
+</footer>
 
 
 <!-- Chart.js -->
