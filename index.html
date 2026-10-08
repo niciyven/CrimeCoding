@@ -12,7 +12,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&family=Special+Elite&family=Oswald:wght@500;700&display=swap" rel="stylesheet">
 
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css?v=3">
 </head>
 
 <body>
@@ -28,7 +28,7 @@
         <li><a href="#anklage">Anklage</a></li>
         <li><a href="#alter">Hintergrund</a></li>
     </ul>
-   
+
 </nav>
 
 
@@ -48,24 +48,27 @@
         <p class="stempel">BETÄUBUNG. MISSBRAUCH. SCHWEIGEN.</p>
     </div>
 
-    <!-- Fotowand: Bilder in den Ordner img/ legen.
-         Fehlt ein Bild, erscheint automatisch eine dunkle Fläche. -->
+    <!-- Fotowand: Bilder liegen im Ordner images/ (klein geschrieben!) -->
     <div class="fotowand">
-        <figure class="foto foto--portrait" style="--bild: url('img/portrait.jpg');">
+        <figure class="foto foto--beschuldigter">
+            <img src="images/PatrikFreiPortraet.webp" alt="Porträt von Patrik Frei">
             <span class="zensur" aria-hidden="true"></span>
-            <figcaption>Der Beschuldigte, 57 – anonymisiert</figcaption>
+            <figcaption>Der Beschuldigte: Patrik Frei</figcaption>
         </figure>
 
-        <figure class="foto foto--ort" style="--bild: url('img/untersiggenthal.jpg');">
+        <figure class="foto foto--opfer">
+            <img src="images/Opfer.webp" alt="Iwona L. und ihre Tochter Paula">
+            <figcaption>Die Opfer: Paula und Iwona L.</figcaption>
+        </figure>
+
+        <figure class="foto foto--grossrat">
+            <img src="images/PatrikFreiGrossrat.webp" alt="Patrik Frei im Aargauer Grossratssaal">
+            <figcaption>Ex-SVP-Politiker im Grossrat</figcaption>
+        </figure>
+
+        <figure class="foto foto--ort">
+            <img src="images/Untersiggenthal.webp" alt="Luftaufnahme von Untersiggenthal AG">
             <figcaption>Untersiggenthal AG</figcaption>
-        </figure>
-
-        <figure class="foto foto--nacht" style="--bild: url('img/nacht.jpg');">
-            <figcaption>Tatzeit: nachts</figcaption>
-        </figure>
-
-        <figure class="foto foto--beweis" style="--bild: url('img/fingerabdruck.jpg');">
-            <figcaption>Beweisstück</figcaption>
         </figure>
     </div>
 
@@ -139,7 +142,7 @@
                     </li>
                     <li>
                         <span class="datum">2023</span>
-                        <p>Nach 44 weiteren Übergriffen: Verhaftung. Seither U-Haft.</p>
+                        <p>Nach 44 weiteren Übergriffen: Verhaftung. Seither <br> U-Haft.</p>
                     </li>
                     <li>
                         <span class="datum">Juli 2026</span>
@@ -200,7 +203,7 @@
                 </div>
 
                 <p class="text-spalte">
-                    Die Grafik zeigt, dass sexualisierte Gewalt Menschen aller Geschlechter betrifft, Frauen jedoch deutlich häufiger betroffen sind.
+                    Die Grafik zeigt, dass sexualisierte Gewalt Menschen aller Geschlechter betrifft, allerdings sind Frauen häufiger betroffen.
                     Die Zahlen erfassen jedoch nur jene Fälle, die der Polizei gemeldet wurden.
                     Das tatsächliche Ausmass dürfte deutlich grösser sein.
                     Gerade Taten unter Betäubung können lange unentdeckt bleiben, weil sich Betroffene teilweise nicht oder nur lückenhaft an das Geschehen erinnern.
@@ -342,10 +345,10 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <!-- Unser JavaScript -->
-<script src="script.js"></script>
+<script src="script.js?v=3"></script>
 
 <!-- Effekte: Akten fliegen rein, Schreibmaschine, Navigation -->
-<script src="effects.js"></script>
+<script src="effects.js?v=3"></script>
 
 </body>
 

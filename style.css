@@ -246,35 +246,41 @@ strong {
 .foto {
     position: absolute;
     margin: 0;
-    padding: 12px 12px 40px;
+    padding: 12px 12px 10px;
     background: #e8e2d4;
     box-shadow: 0 20px 45px rgba(0, 0, 0, 0.7);
+
+    /* Bild oben, Bildlegende darunter – nichts überlappt */
+    display: flex;
+    flex-direction: column;
 }
 
-/* Das eigentliche Bild. Fehlt die Datei, bleibt der dunkle Verlauf sichtbar. */
-.foto::before {
-    content: '';
+/* Das eigentliche Bild */
+.foto img {
     display: block;
     width: 100%;
-    height: 100%;
-    background-image:
-            var(--bild),
-            radial-gradient(circle at 50% 35%, #555 0%, #222 55%, #0c0c0c 100%);
-    background-size: cover;
-    background-position: center;
+    flex: 1 1 auto;             /* nimmt den ganzen Platz über der Legende */
+    min-height: 0;
+    object-fit: cover;          /* füllt den Rahmen, ohne zu verzerren */
+    object-position: center;
+    background: #222;
     filter: grayscale(1) contrast(1.15) brightness(0.85);
 }
 
 .foto figcaption {
-    position: absolute;
-    left: 14px;
-    bottom: 10px;
+    flex: 0 0 auto;
+    margin-top: 8px;
     font-family: var(--font-schreibmaschine);
     font-size: 13px;
+    line-height: 1.3;
     color: var(--tinte);
+    hyphens: auto;              /* lange Wörter sauber trennen */
+    overflow-wrap: anywhere;
 }
 
-.foto--portrait {
+/* Positionen auf der Fotowand */
+
+.foto--beschuldigter {
     left: 2%;
     top: 0;
     width: 52%;
@@ -283,7 +289,11 @@ strong {
     z-index: 2;
 }
 
-.foto--ort {
+.foto--beschuldigter img {
+    object-position: center 20%;   /* Gesicht im Bild halten */
+}
+
+.foto--opfer {
     right: 0;
     top: 30px;
     width: 42%;
@@ -291,7 +301,7 @@ strong {
     transform: rotate(3deg);
 }
 
-.foto--nacht {
+.foto--grossrat {
     left: 40%;
     bottom: 0;
     width: 32%;
@@ -300,7 +310,11 @@ strong {
     z-index: 3;
 }
 
-.foto--beweis {
+.foto--grossrat img {
+    object-position: 30% center;   /* Person steht links im Bild */
+}
+
+.foto--ort {
     right: 2%;
     bottom: 20px;
     width: 24%;
@@ -1076,6 +1090,15 @@ main {
 
     .fotowand {
         height: 360px;
+    }
+
+    .foto {
+        padding: 7px 7px 6px;
+    }
+
+    .foto figcaption {
+        margin-top: 5px;
+        font-size: 10px;
     }
 
     .zeitstrahl {
