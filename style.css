@@ -278,6 +278,17 @@ strong {
     overflow-wrap: anywhere;
 }
 
+/* Bildquelle unter der Legende: klein, fein, etwas blasser */
+.foto-quelle {
+    display: block;
+    margin-top: 2px;
+    font-family: var(--font-text);
+    font-size: 10px;
+    font-weight: 400;
+    letter-spacing: 0.02em;
+    color: rgba(27, 26, 24, 0.6);
+}
+
 /* Positionen auf der Fotowand */
 
 .foto--beschuldigter {
@@ -431,29 +442,39 @@ main {
     list-style: none;
 }
 
-.zeitstrahl::before {
-    content: '';
-    position: absolute;
-    top: 6px;
-    left: 0;
-    right: 0;
-    height: 1px;
-    background: var(--text-grau);
-}
-
 .zeitstrahl li {
     position: relative;
 }
 
+/* Punkt */
 .zeitstrahl li::before {
     content: '';
     position: absolute;
     top: -30px;
     left: 8px;
+    z-index: 1;
     width: 11px;
     height: 11px;
     border-radius: 50%;
     background: var(--papier);
+}
+
+/* Linie: jeder Eintrag zeichnet sein eigenes Stück bis zum nächsten.
+   So läuft die Linie auch weiter, wenn der Zeitstrahl auf dem Handy
+   auf zwei Zeilen umbricht. */
+.zeitstrahl li::after {
+    content: '';
+    position: absolute;
+    top: -25px;
+    left: 0;
+    right: -24px;          /* = gap, überbrückt die Lücke zum Nachbarn */
+    height: 1px;
+    background: var(--text-grau);
+}
+
+/* Letzter Eintrag einer Zeile: Linie nicht über den Rand hinaus */
+.zeitstrahl li:last-child::after {
+    right: 0;
 }
 
 .datum {
@@ -1096,9 +1117,18 @@ main {
         font-size: 10px;
     }
 
+    .foto-quelle {
+        font-size: 8px;
+    }
+
     .zeitstrahl {
         grid-template-columns: 1fr 1fr;
-        row-gap: 40px;
+        row-gap: 52px;
+    }
+
+    /* Zwei Einträge pro Zeile: der rechte beendet jeweils die Linie */
+    .zeitstrahl li:nth-child(2n)::after {
+        right: 0;
     }
 
     .fakten {
