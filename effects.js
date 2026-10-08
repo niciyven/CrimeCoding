@@ -74,7 +74,9 @@ function tippen(element, tempo, fertig) {
     element.setAttribute('aria-label', text.replace(/\u00AD/g, ''));
 
     // Jeden Buchstaben in ein eigenes <span> packen.
-    // So bleibt der Platz reserviert und nichts springt.
+    // Noch nicht getippte Buchstaben sind unsichtbar, nehmen aber
+    // schon ihren Platz ein. So bricht der Titel von Anfang an
+    // genau gleich um wie am Schluss und nichts springt.
     element.textContent = '';
     const buchstaben = [];
 
@@ -87,19 +89,27 @@ function tippen(element, tempo, fertig) {
         buchstaben.push(span);
     }
 
-    // Blinkender Cursor
-    const cursor = document.createElement('span');
-    cursor.className = 'cursor';
-    cursor.setAttribute('aria-hidden', 'true');
-    element.insertBefore(cursor, buchstaben[0]);
+    // Der blinkende Cursor ist KEIN eigenes Element zwischen den
+    // Buchstaben (das hat den Titel umbrechen lassen), sondern hängt
+    // per CSS (::after) am zuletzt getippten Buchstaben und braucht
+    // keinen Platz.
+    //
+    // Damit er auf derselben Grundlinie sitzt wie die Buchstaben,
+    // messen wir einmal, wie weit die Grundlinie vom oberen Rand
+    // eines Buchstabens entfernt ist. offsetTop ignoriert Drehungen,
+    // darum stört die schräge Karte die Messung nicht.
+    const messpunkt = document.createElement('span');
+    messpunkt.style.cssText = 'display:inline-block;width:0;height:0;vertical-align:baseline';
+    buchstaben[0].appendChild(messpunkt);
+    const grundlinie = messpunkt.offsetTop - buchstaben[0].offsetTop;
+    messpunkt.remove();
+    element.style.setProperty('--grundlinie', grundlinie + 'px');
 
     let i = 0;
 
     const intervall = setInterval(() => {
-        buchstaben[i].classList.add('getippt');
-
-        // Cursor hinter den aktuellen Buchstaben setzen
-        element.insertBefore(cursor, buchstaben[i].nextSibling);
+        if (i > 0) buchstaben[i - 1].classList.remove('cursor-hier');
+        buchstaben[i].classList.add('getippt', 'cursor-hier');
 
         i++;
 
@@ -108,7 +118,7 @@ function tippen(element, tempo, fertig) {
             if (fertig) fertig();
 
             // Cursor nach kurzer Zeit ausblenden
-            setTimeout(() => cursor.classList.add('aus'), 1800);
+            setTimeout(() => buchstaben[i - 1].classList.remove('cursor-hier'), 1800);
         }
     }, tempo);
 }
@@ -120,13 +130,20 @@ if (titel && stempel) {
         // Titel verstecken, damit er nicht kurz aufblitzt
         titel.style.visibility = 'hidden';
 
-        // kurz warten, bis die Karte eingeflogen ist
-        setTimeout(() => {
-            titel.style.visibility = '';
-            tippen(titel, 95, () => {
-                setTimeout(() => stempel.classList.add('gestempelt'), 300);
-            });
-        }, 600);
+        // Erst tippen, wenn die Schrift (Oswald) geladen ist.
+        // Sonst wechselt die Schrift mitten im Tippen, die Buchstaben
+        // werden breiter und der Titel springt in eine neue Zeile.
+        const schriftBereit = document.fonts ? document.fonts.ready : Promise.resolve();
+
+        schriftBereit.then(() => {
+            // kurz warten, bis die Karte eingeflogen ist
+            setTimeout(() => {
+                titel.style.visibility = '';
+                tippen(titel, 95, () => {
+                    setTimeout(() => stempel.classList.add('gestempelt'), 300);
+                });
+            }, 600);
+        });
     }
 }
 

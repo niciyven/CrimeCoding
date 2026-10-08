@@ -323,19 +323,6 @@ strong {
     z-index: 3;
 }
 
-/* schwarzer Zensurbalken über den Augen */
-.zensur {
-    position: absolute;
-    left: 18%;
-    right: 14%;
-    top: 30%;
-    height: 9%;
-    background: #0b0b0b;
-    transform: rotate(-3deg);
-    border-radius: 3px;
-    z-index: 2;
-}
-
 .scroll-hinweis {
     position: absolute;
     left: 40px;
@@ -739,18 +726,26 @@ main {
     visibility: visible;
 }
 
-.cursor {
-    display: inline-block;
-    width: 0.08em;
-    height: 0.85em;
-    margin-left: 0.04em;
-    background: var(--rot);
-    vertical-align: -0.05em;
-    animation: blinken 0.8s steps(1) infinite;
+/* Blinkender Cursor beim Tippen.
+   Er hängt am zuletzt getippten Buchstaben (Klasse von effects.js)
+   und ist absolut positioniert: Er braucht keinen Platz, darum
+   bricht der Titel nie anders um.
+   --grundlinie misst effects.js: Abstand vom oberen Rand des
+   Buchstabens bis zur Grundlinie. Der Cursor endet knapp darunter. */
+.taste.cursor-hier {
+    position: relative;
 }
 
-.cursor.aus {
-    display: none;
+.taste.cursor-hier::after {
+    content: '';
+    position: absolute;
+    left: 100%;
+    top: calc(var(--grundlinie, 0.75em) - 0.74em);
+    width: 0.08em;
+    height: 0.78em;
+    margin-left: 0.04em;
+    background: var(--rot);
+    animation: blinken 0.8s steps(1) infinite;
 }
 
 @keyframes blinken {
