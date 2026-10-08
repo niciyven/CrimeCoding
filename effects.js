@@ -54,7 +54,14 @@ const aktenBeobachter = new IntersectionObserver(eintraege => {
     threshold: 0.15
 });
 
-akten.forEach(element => aktenBeobachter.observe(element));
+// Gibt es den Startbildschirm, fliegen die Karten und Fotos oben
+// erst ein, wenn die Akte geöffnet wurde (Teil 5).
+const mitStartbildschirm = !!document.getElementById('intro');
+
+akten.forEach(element => {
+    if (mitStartbildschirm && element.closest('.hero')) return;
+    aktenBeobachter.observe(element);
+});
 
 
 // ===================================================
@@ -66,9 +73,42 @@ akten.forEach(element => aktenBeobachter.observe(element));
 const titel = document.querySelector('.hero h1');
 const stempel = document.querySelector('.stempel');
 
+// ---------- Schreibmaschinen-Ton ----------
+// Der Ton kommt aus einer Audiodatei (<audio id="tippton"> in index.html).
+// Damit Ton und Buchstaben zusammen fertig werden, passt sich das
+// Tipptempo an die Länge der Datei an:
+//   Tempo = Länge der Datei / Anzahl Buchstaben
+// Ist der Ton aus (oder die Datei fehlt), tippt der Titel im normalen
+// Tempo ohne Ton.
+//
+// Der Ton wird direkt beim ersten Tippen versucht. Manche Browser
+// blockieren Ton, bis man geklickt hat – dann tippt der Titel stumm.
+// Klickt man oben rechts auf "Ton an", tippt er sich nochmals mit Ton.
+
+const tippton = document.getElementById('tippton');
+
+const NORMALES_TEMPO = 95;     // Millisekunden pro Buchstabe ohne Ton
+const MIN_TEMPO = 40;          // schneller wird's nie
+const MAX_TEMPO = 300;         // langsamer wird's nie
+
+// Ist der Ton eingeschaltet? (wird im Teil 6 "Ton" gesetzt)
+let tonAn = false;
+
+// Hat jemand den Ton absichtlich ausgeschaltet?
+// Dann gibt es keinen Ton mehr, auch nicht beim Öffnen der Akte.
+let tonBewusstAus = false;
+
 function tippen(element, tempo, fertig) {
 
-    const text = element.textContent;
+    // Den Originaltext beim ersten Mal merken, damit man den Titel
+    // später nochmals tippen lassen kann (beim Einschalten des Tons).
+    if (element.dataset.text === undefined) {
+        element.dataset.text = element.textContent;
+    }
+    const text = element.dataset.text;
+
+    // Läuft schon ein Tippen? Dann abbrechen und neu beginnen.
+    clearInterval(element._tippen);
 
     // Für Screenreader bleibt der ganze Titel lesbar
     element.setAttribute('aria-label', text.replace(/\u00AD/g, ''));
@@ -107,7 +147,11 @@ function tippen(element, tempo, fertig) {
 
     let i = 0;
 
-    const intervall = setInterval(() => {
+    // Ein Buchstabe pro Schritt. Der erste kommt sofort (nicht erst
+    // nach einer Pause), damit er genau mit dem Ton beginnt.
+    let intervall;
+
+    function schritt() {
         if (i > 0) buchstaben[i - 1].classList.remove('cursor-hier');
         buchstaben[i].classList.add('getippt', 'cursor-hier');
 
@@ -120,7 +164,74 @@ function tippen(element, tempo, fertig) {
             // Cursor nach kurzer Zeit ausblenden
             setTimeout(() => buchstaben[i - 1].classList.remove('cursor-hier'), 1800);
         }
-    }, tempo);
+    }
+
+    schritt();
+    intervall = setInterval(schritt, tempo);
+
+    element._tippen = intervall;
+}
+
+// Titel tippen, danach den Stempel draufknallen.
+// Mit Ton: Tempo so wählen, dass Tippen und Tondatei gleich lang sind.
+//
+// Der Schreibmaschinen-Ton wird JEDES Mal versucht, auch direkt beim
+// Laden der Seite. Ob er wirklich erklingt, entscheidet der Browser:
+// Erlaubt er es, tippt der Titel synchron zum Ton. Blockiert er es,
+// tippt der Titel im normalen Tempo stumm weiter.
+function titelTippen() {
+    stempel.classList.remove('gestempelt');
+
+    const text = titel.dataset.text ?? titel.textContent;
+    const anzahl = text.replace(/\u00AD/g, '').length;   // ohne Trennstrich
+
+    function starten(tempo) {
+        titel.style.visibility = '';
+        tippen(titel, tempo, () => {
+            setTimeout(() => {
+                stempel.classList.add('gestempelt');
+
+                // Erst wenn der Titel fertig ist, setzt die Musik ein
+                if (tonAn) musikStarten();
+            }, 300);
+        });
+    }
+
+    // Kein Ton gewünscht oder keine Datei: stumm tippen
+    if (!tippton || tonBewusstAus) {
+        starten(NORMALES_TEMPO);
+        return;
+    }
+
+    let gestartet = false;
+    function einmalStarten(tempo) {
+        if (gestartet) return;
+        gestartet = true;
+        starten(tempo);
+    }
+
+    function tonVersuchen() {
+        let tempo = NORMALES_TEMPO;
+        if (tippton.duration > 0 && isFinite(tippton.duration)) {
+            tempo = (tippton.duration * 1000) / anzahl;
+            tempo = Math.min(MAX_TEMPO, Math.max(MIN_TEMPO, tempo));
+        }
+
+        tippton.currentTime = 0;
+        tippton.play()
+            .then(() => einmalStarten(tempo))                // Ton läuft -> synchron tippen
+            .catch(() => einmalStarten(NORMALES_TEMPO));     // blockiert -> stumm tippen
+    }
+
+    // Länge der Datei muss bekannt sein, bevor wir das Tempo berechnen
+    if (tippton.duration > 0) {
+        tonVersuchen();
+    } else {
+        tippton.addEventListener('loadedmetadata', tonVersuchen, { once: true });
+        tippton.load();
+        // Datei fehlt oder lädt zu langsam: nach 1 s stumm loslegen
+        setTimeout(() => einmalStarten(NORMALES_TEMPO), 1000);
+    }
 }
 
 if (titel && stempel) {
@@ -135,15 +246,11 @@ if (titel && stempel) {
         // werden breiter und der Titel springt in eine neue Zeile.
         const schriftBereit = document.fonts ? document.fonts.ready : Promise.resolve();
 
-        schriftBereit.then(() => {
-            // kurz warten, bis die Karte eingeflogen ist
-            setTimeout(() => {
-                titel.style.visibility = '';
-                tippen(titel, 95, () => {
-                    setTimeout(() => stempel.classList.add('gestempelt'), 300);
-                });
-            }, 600);
-        });
+        // Gibt es einen Einstiegsbildschirm, startet das Tippen erst
+        // nach dem Klick dort (Teil 7). Sonst wie gewohnt nach dem Laden.
+        if (!document.getElementById('intro')) {
+            schriftBereit.then(() => setTimeout(titelTippen, 600));
+        }
     }
 }
 
@@ -292,77 +399,176 @@ zaehlZahlen.forEach(element => zahlenBeobachter.observe(element));
 
 
 // ===================================================
-// 5. AKTE ÖFFNEN
+// 5. AKTE ÖFFNEN (Startbildschirm)
 // ===================================================
-// Der Inhalt unter dem Titel ist zuerst versteckt. Erst nach dem
-// Klick auf "Akte öffnen" klappt der Deckel auf, die Mappe
-// verschwindet und der Inhalt entfaltet sich wie Papier.
+// Beim Laden zeigt der Startbildschirm nur die geschlossene Akte.
+// Klick auf "Akte öffnen":
+//   1. Ton wird freigeschaltet (der Klick erlaubt es dem Browser)
+//   2. Deckel klappt auf, der Startbildschirm blendet aus
+//   3. Oben erscheint die Seite, die Karten fliegen ein
+//   4. "Untersiggenthal" tippt sich mit Schreibmaschinen-Ton
+//   5. Stempel, danach setzt die Musik ein
 
-const aktendeckelBereich = document.getElementById('aktendeckel');
+const intro = document.getElementById('intro');
 const aktendeckel = document.querySelector('.aktendeckel');
 const akteKnopf = document.querySelector('.akte-oeffnen');
 const akteInhalt = document.getElementById('akte-inhalt');
 
 let akteIstOffen = false;
 
-function akteOeffnen(ziel) {
+// Tondateien innerhalb des Klicks einmal stumm anspielen und sofort
+// stoppen. Danach darf der Browser sie später abspielen
+// (wichtig vor allem für Safari und iPhone).
+function tonFreischalten(audio) {
+    if (!audio) return;
+    audio.muted = true;
+    audio.play()
+        .then(() => {
+            audio.pause();
+            audio.currentTime = 0;
+            audio.muted = false;
+        })
+        .catch(() => { audio.muted = false; });
+}
 
-    // Schon offen? Dann nur noch hinscrollen
-    if (akteIstOffen) {
-        if (ziel) ziel.scrollIntoView({ behavior: 'smooth' });
-        return;
-    }
+function akteOeffnen() {
+    if (akteIstOffen) return;
     akteIstOffen = true;
 
     akteKnopf.setAttribute('aria-expanded', 'true');
 
+    // 1. Ton freischalten – muss direkt im Klick passieren
+    if (!tonBewusstAus) {
+        tonFreischalten(tippton);
+        tonFreischalten(musik);
+        tonEinschalten(false, false);   // Musik kommt erst nach dem Titel
+    }
+
     const pause = wenigBewegung ? 0 : 900;
 
-    // 1. Deckel klappt auf
+    // 2. Deckel klappt auf
     aktendeckel.classList.add('offen');
+    intro.classList.add('offen');
 
     setTimeout(() => {
-        // 2. Mappe verschwindet, 3. Inhalt klappt auf
-        aktendeckelBereich.hidden = true;
+        // Startbildschirm ausblenden, Seite freigeben
+        intro.classList.add('weg');
+        document.body.classList.remove('intro-aktiv');
         akteInhalt.classList.add('offen');
+        window.scrollTo(0, 0);
 
         // Die Grafiken kennen jetzt ihre richtige Grösse
         window.dispatchEvent(new Event('resize'));
 
-        // 4. Zum gewünschten Kapitel scrollen (Standard: "Der Fall").
-        // Wir rechnen die Position selbst aus, weil der Inhalt während
-        // des Aufklappens noch schräg steht und der Browser sonst an
-        // die falsche Stelle scrollen würde.
-        requestAnimationFrame(() => {
-            const kapitel = ziel || document.getElementById('fall');
-            let oben = 0;
-            for (let el = kapitel; el; el = el.offsetParent) {
-                oben += el.offsetTop;
-            }
-            window.scrollTo({
-                top: oben - 80,   // Platz für die Navigation
-                behavior: wenigBewegung ? 'auto' : 'smooth'
-            });
+        // 3. Karten und Fotos oben einfliegen lassen
+        document.querySelectorAll('.hero .einfliegen').forEach(element => {
+            aktenBeobachter.observe(element);
         });
+
+        // 4. Titel tippen (mit Ton, falls eingeschaltet)
+        if (titel && stempel && !wenigBewegung) {
+            const schriftBereit = document.fonts ? document.fonts.ready : Promise.resolve();
+            schriftBereit.then(() => setTimeout(titelTippen, 600));
+        } else if (tonAn) {
+            musikStarten();
+        }
     }, pause);
 }
 
-if (akteKnopf && akteInhalt) {
+if (akteKnopf) {
+    akteKnopf.addEventListener('click', akteOeffnen);
+}
 
-    akteKnopf.addEventListener('click', () => akteOeffnen());
+// "Ohne Ton öffnen": Ton bleibt aus (keine Musik, keine Schreibmaschine).
+// Oben rechts kann man ihn später trotzdem mit "Ton an" einschalten.
+const stummKnopf = document.querySelector('.intro-stumm');
 
-    // Klickt jemand in der Navigation auf ein Kapitel, während die
-    // Akte noch zu ist: zuerst öffnen, dann dorthin scrollen.
-    navLinks.forEach(link => {
-        link.addEventListener('click', event => {
-            const ziel = document.querySelector(link.getAttribute('href'));
+if (stummKnopf) {
+    stummKnopf.addEventListener('click', () => {
+        tonBewusstAus = true;
+        tonKnopf.setAttribute('aria-pressed', 'false');
+        tonText.textContent = 'Ton an';
+        akteOeffnen();
+    });
+}
 
-            if (ziel && akteInhalt.contains(ziel) && !akteIstOffen) {
-                event.preventDefault();
-                document.getElementById('aktendeckel')
-                    .scrollIntoView({ behavior: 'smooth', block: 'center' });
-                akteOeffnen(ziel);
-            }
-        });
+
+// ===================================================
+// 6. TON (Musik + Schreibmaschine)
+// ===================================================
+// Der Knopf oben rechts ist von Anfang an da.
+// - Klick auf "Ton an": Musik startet, und der Titel tippt sich
+//   nochmals mit Schreibmaschinen-Ton (Datei, siehe Teil 2).
+// - Klick auf "Akte öffnen" (Startbildschirm): Ton geht an, der Titel
+//   tippt mit Schreibmaschinen-Ton, danach setzt die Musik ein.
+// - Klick auf "Ton aus": Musik wird leiser und stoppt, kein Tippen mehr.
+
+const tonKnopf = document.querySelector('.ton-knopf');
+const musik = document.getElementById('musik');
+const tonText = document.querySelector('.ton-text');
+
+const ZIEL_LAUTSTAERKE = 0.4;   // Musik: 0 = stumm, 1 = volle Lautstärke
+let ueberblendung;
+
+
+function lautstaerkeAendern(ziel, dauer, fertig) {
+    clearInterval(ueberblendung);
+    const start = musik.volume;
+    const schritte = 30;
+    let schritt = 0;
+
+    ueberblendung = setInterval(() => {
+        schritt++;
+        musik.volume = start + (ziel - start) * (schritt / schritte);
+        if (schritt >= schritte) {
+            clearInterval(ueberblendung);
+            if (fertig) fertig();
+        }
+    }, dauer / schritte);
+}
+
+// Musik leise starten und lauter werden lassen (nur wenn sie nicht schon läuft)
+function musikStarten() {
+    if (!musik || !musik.paused) return;
+    musik.volume = 0;
+    musik.play()
+        .then(() => lautstaerkeAendern(ZIEL_LAUTSTAERKE, 1500))
+        .catch(() => { tonText.textContent = 'Musik nicht gefunden'; });
+}
+
+function tonEinschalten(titelNeuTippen, mitMusik) {
+    tonAn = true;
+    tonBewusstAus = false;
+
+    tonKnopf.setAttribute('aria-pressed', 'true');
+    tonText.textContent = 'Ton aus';
+
+    if (mitMusik) musikStarten();
+
+    // Titel nochmals tippen – aber nur, wenn man ihn gerade sieht
+    if (titelNeuTippen && titel && !wenigBewegung) {
+        const oben = titel.getBoundingClientRect();
+        if (oben.bottom > 0 && oben.top < window.innerHeight) {
+            titelTippen();
+        }
+    }
+}
+
+function tonAusschalten() {
+    tonAn = false;
+    tonKnopf.setAttribute('aria-pressed', 'false');
+    tonText.textContent = 'Ton an';
+    if (musik) lautstaerkeAendern(0, 800, () => musik.pause());
+    if (tippton) tippton.pause();
+}
+
+if (tonKnopf) {
+    tonKnopf.addEventListener('click', () => {
+        if (tonAn) {
+            tonBewusstAus = true;
+            tonAusschalten();
+        } else {
+            tonEinschalten(true, true);
+        }
     });
 }

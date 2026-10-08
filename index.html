@@ -5,17 +5,59 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Case Files – Der Fall Untersiggenthal</title>
+    <title>Case File – Der Fall Untersiggenthal</title>
 
     <!-- Schriften: Schreibmaschine + Stempel-Look -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&family=Special+Elite&family=Oswald:wght@500;700&display=swap" rel="stylesheet">
 
-    <link rel="stylesheet" href="style.css?v=6">
+    <link rel="stylesheet" href="style.css?v=16">
 </head>
 
-<body>
+<body class="intro-aktiv">
+
+<!-- =====================================================
+     STARTBILDSCHIRM – GESCHLOSSENE AKTE
+     Füllt beim Laden den ganzen Bildschirm. Der Klick auf
+     "Akte öffnen" klappt den Deckel auf, schaltet den Ton frei
+     (Browser erlauben Ton erst nach einem Klick) und gibt die
+     Seite frei. Danach tippt sich der Titel mit Ton.
+     ===================================================== -->
+<div class="intro" id="intro">
+    <section class="aktendeckel-bereich" id="aktendeckel">
+        <div class="aktendeckel">
+
+            <!-- Papiere, die hinten herausschauen -->
+            <div class="aktendeckel-papiere" aria-hidden="true">
+                <span class="blatt blatt--1"></span>
+                <span class="blatt blatt--2"></span>
+            </div>
+
+            <!-- Vorderer Deckel, der aufklappt -->
+            <div class="deckel">
+                <span class="deckel-reiter">Case File 001</span>
+
+                <div class="deckel-etikett">
+                    <span class="etikett-zeile">Akte</span>
+                    <strong>Untersiggenthal</strong>
+                    <span class="etikett-zeile">Anklage 2026 · 3 Geschädigte</span>
+                </div>
+
+                <span class="deckel-stempel" aria-hidden="true">Vertraulich</span>
+
+                <button class="akte-oeffnen" type="button"
+                        aria-expanded="false" aria-controls="akte-inhalt">
+                    Akte öffnen
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Für Leute, die keine Musik und keine Soundeffekte wollen -->
+    <button class="intro-stumm" type="button">Ohne Ton öffnen</button>
+</div>
+
 
 <!-- =====================================================
      NAVIGATION
@@ -29,6 +71,18 @@
         <li><a href="#alter">Hintergrund</a></li>
     </ul>
 
+    <!-- Ton-Knopf: von Anfang an sichtbar. "Ton an" startet die Musik
+         und lässt den Titel nochmals mit Schreibmaschinen-Ton tippen.
+         Beim Öffnen der Akte geht der Ton ebenfalls an. -->
+    <button class="ton-knopf" type="button" aria-pressed="false">
+        <span class="ton-balken" aria-hidden="true"><i></i><i></i><i></i></span>
+        <span class="ton-text">Ton an</span>
+    </button>
+    <audio id="musik" src="musik/alexgrohl_crime-scene_main.wav" loop preload="none"></audio>
+
+    <!-- Schreibmaschinen-Ton zum Titel. Das Tipptempo passt sich
+         automatisch an die Länge dieser Datei an. -->
+    <audio id="tippton" src="musik/typewriter.wav" preload="auto"></audio>
 </nav>
 
 
@@ -86,39 +140,6 @@
 </header>
 
 
-<!-- =====================================================
-     GESCHLOSSENE AKTE
-     Erst nach dem Klick auf "Akte öffnen" klappt der
-     Inhalt darunter auf (gesteuert von effekte.js).
-     ===================================================== -->
-<section class="aktendeckel-bereich" id="aktendeckel">
-    <div class="aktendeckel">
-
-        <!-- Papiere, die hinten herausschauen -->
-        <div class="aktendeckel-papiere" aria-hidden="true">
-            <span class="blatt blatt--1"></span>
-            <span class="blatt blatt--2"></span>
-        </div>
-
-        <!-- Vorderer Deckel, der aufklappt -->
-        <div class="deckel">
-            <span class="deckel-reiter">Case File 001</span>
-
-            <div class="deckel-etikett">
-                <span class="etikett-zeile">Akte</span>
-                <strong>Untersiggenthal</strong>
-                <span class="etikett-zeile">Anklage 2026 · 3 Geschädigte</span>
-            </div>
-
-            <span class="deckel-stempel" aria-hidden="true">Vertraulich</span>
-
-            <button class="akte-oeffnen" type="button"
-                    aria-expanded="false" aria-controls="akte-inhalt">
-                Akte öffnen
-            </button>
-        </div>
-    </div>
-</section>
 
 
 <!-- Alles ab hier ist der Inhalt der Akte -->
@@ -345,7 +366,7 @@
             Quellen: SRF News (22.07.2026), Bundesamt für Statistik –
             Polizeiliche Kriminalstatistik 2025
         </p>
-        <p><strong>Case Files</strong> – ein journalistisches Projekt</p>
+        <p><strong>Case File</strong> – ein datenjournalistisches Projekt</p>
     </footer>
 
 </div>
@@ -356,10 +377,10 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <!-- Unser JavaScript -->
-<script src="script.js?v=6"></script>
+<script src="script.js?v=16"></script>
 
 <!-- Effekte: Akten fliegen rein, Schreibmaschine, Navigation -->
-<script src="effects.js?v=6"></script>
+<script src="effects.js?v=16"></script>
 
 </body>
 
