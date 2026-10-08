@@ -86,6 +86,20 @@ const stempel = document.querySelector('.stempel');
 // Klickt man oben rechts auf "Ton an", tippt er sich nochmals mit Ton.
 
 const tippton = document.getElementById('tippton');
+const blaetterton = document.getElementById('blaetterton');
+const stempelton = document.getElementById('stempelton');
+
+// Wie lange nach dem Start der Stempel-Animation der Stempel-Ton kommt
+// (in Millisekunden). Die Animation dauert 450 ms; der Aufprall liegt
+// etwa in der Mitte. Bei Bedarf feiner einstellen.
+const STEMPEL_VERZOEGERUNG = 150;
+
+// Kurzen Soundeffekt von vorne abspielen – nur wenn der Ton an ist
+function effektAbspielen(audio) {
+    if (!tonAn || !audio) return;
+    audio.currentTime = 0;
+    audio.play().catch(() => {});
+}
 
 const NORMALES_TEMPO = 95;     // Millisekunden pro Buchstabe ohne Ton
 const MIN_TEMPO = 40;          // schneller wird's nie
@@ -190,6 +204,7 @@ function titelTippen() {
         tippen(titel, tempo, () => {
             setTimeout(() => {
                 stempel.classList.add('gestempelt');
+                setTimeout(() => effektAbspielen(stempelton), STEMPEL_VERZOEGERUNG);
 
                 // Erst wenn der Titel fertig ist, setzt die Musik ein
                 if (tonAn) musikStarten();
@@ -407,7 +422,8 @@ zaehlZahlen.forEach(element => zahlenBeobachter.observe(element));
 //   2. Deckel klappt auf, der Startbildschirm blendet aus
 //   3. Oben erscheint die Seite, die Karten fliegen ein
 //   4. "Untersiggenthal" tippt sich mit Schreibmaschinen-Ton
-//   5. Stempel, danach setzt die Musik ein
+//   5. Stempel (mit Stempel-Ton), danach setzt die Musik ein
+// Beim Aufklappen des Deckels ertönt ein Blätter-Geräusch.
 
 const intro = document.getElementById('intro');
 const aktendeckel = document.querySelector('.aktendeckel');
@@ -440,8 +456,12 @@ function akteOeffnen() {
     // 1. Ton freischalten – muss direkt im Klick passieren
     if (!tonBewusstAus) {
         tonFreischalten(tippton);
+        tonFreischalten(stempelton);
         tonFreischalten(musik);
         tonEinschalten(false, false);   // Musik kommt erst nach dem Titel
+
+        // Blätter-Geräusch, während der Deckel aufklappt
+        effektAbspielen(blaetterton);
     }
 
     const pause = wenigBewegung ? 0 : 900;
@@ -559,7 +579,7 @@ function tonAusschalten() {
     tonKnopf.setAttribute('aria-pressed', 'false');
     tonText.textContent = 'Ton an';
     if (musik) lautstaerkeAendern(0, 800, () => musik.pause());
-    if (tippton) tippton.pause();
+    [tippton, blaetterton, stempelton].forEach(audio => { if (audio) audio.pause(); });
 }
 
 if (tonKnopf) {
