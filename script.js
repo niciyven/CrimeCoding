@@ -178,14 +178,15 @@ fetch('unload.php')
         // ANTEIL UNTER 30 JAHREN (Hypothese)
         // ===================================================
 
-        const totalZeilen = daten.filter(eintrag =>
-            eintrag.straftatbestand.trim().toLowerCase() === 'total sexualisierte gewalt'
+        // Nur Vergewaltigungen – gleiche Grundlage wie Grafik 2 daneben
+        const vergewaltigungsZeilen = daten.filter(eintrag =>
+            eintrag.straftatbestand.trim().toLowerCase().includes('vergewaltigung')
         );
 
         let unter30 = 0;
         let alle = 0;
 
-        totalZeilen.forEach(eintrag => {
+        vergewaltigungsZeilen.forEach(eintrag => {
             const anzahl = Number(eintrag.maennlich ?? 0) + Number(eintrag.weiblich ?? 0);
             alle += anzahl;
 

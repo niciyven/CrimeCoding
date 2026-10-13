@@ -24,10 +24,15 @@
 
 html {
     scroll-behavior: smooth;
+    overflow-x: clip;   /* siehe body */
 }
 
 body {
     margin: 0;
+    /* Sicherheitsnetz: nichts darf die Seite seitlich verschiebbar machen
+       (z. B. schräg gedrehte Karten auf dem Handy). "clip" statt "hidden",
+       damit die Navigation oben kleben bleibt. */
+    overflow-x: clip;
     background-color: var(--schwarz);
     /* leichtes Rauschen / Körnung über den Hintergrund */
     background-image:
@@ -542,6 +547,7 @@ main {
 .text-spalte {
     max-width: 720px;
     margin: 0;
+    overflow-wrap: break-word;   /* sehr lange Wörter notfalls umbrechen */
 }
 
 .text-spalte p {
@@ -730,8 +736,12 @@ main {
 
 .anklagepunkte li {
     counter-increment: punkt;
-    display: flex;
-    gap: 18px;
+    /* Zwei Spalten: links die Nummer, rechts der Text.
+       minmax(0, 1fr) lässt den Text schmaler werden und umbrechen,
+       statt rechts aus der Karte zu ragen. */
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    column-gap: 18px;
     padding: 12px 0;
     border-bottom: 1px dashed rgba(27, 26, 24, 0.3);
     font-family: var(--font-schreibmaschine);
@@ -747,7 +757,9 @@ main {
     color: var(--rot);
 }
 
+/* Zusatz in Klammern: eigene Zeile, bündig unter dem Text */
 .anklagepunkte small {
+    grid-column: 2;
     display: block;
     font-size: 14px;
     opacity: 0.7;
@@ -1196,7 +1208,7 @@ main {
 @media (max-width: 1000px) {
 
     .hero {
-        grid-template-columns: 1fr;
+        grid-template-columns: minmax(0, 1fr);   /* nie breiter als der Bildschirm */
         padding: 50px 20px 90px;
     }
 
@@ -1205,13 +1217,15 @@ main {
     }
 
     .kapitel {
-        grid-template-columns: 1fr;
+        grid-template-columns: minmax(0, 1fr);
         gap: 30px;
         padding: 50px 24px;
     }
 
+    /* minmax(0, 1fr) statt 1fr: Sonst wird die Spalte so breit wie das
+       längste Wort ("Sedierungsmitteln") und ragt rechts aus dem Bild. */
     .anklage-layout {
-        grid-template-columns: 1fr;
+        grid-template-columns: minmax(0, 1fr);
     }
 }
 

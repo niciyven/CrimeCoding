@@ -94,9 +94,17 @@ const stempelton = document.getElementById('stempelton');
 // etwa in der Mitte. Bei Bedarf feiner einstellen.
 const STEMPEL_VERZOEGERUNG = 150;
 
+// Wie lange nach dem Stempel die Musik einsetzt (in Millisekunden)
+const MUSIK_NACH_STEMPEL = 700;
+
+// Soundeffekte (Blättern, Schreibmaschine, Stempel) gibt es nur, wenn
+// man die Akte MIT Ton geöffnet hat. Wer "Ohne Ton öffnen" wählt und
+// später die Musik einschaltet, bekommt nur die Musik.
+let effekteErlaubt = false;
+
 // Kurzen Soundeffekt von vorne abspielen – nur wenn der Ton an ist
 function effektAbspielen(audio) {
-    if (!tonAn || !audio) return;
+    if (!effekteErlaubt || !tonAn || !audio) return;
     audio.currentTime = 0;
     audio.play().catch(() => {});
 }
@@ -206,14 +214,14 @@ function titelTippen() {
                 stempel.classList.add('gestempelt');
                 setTimeout(() => effektAbspielen(stempelton), STEMPEL_VERZOEGERUNG);
 
-                // Erst wenn der Titel fertig ist, setzt die Musik ein
-                if (tonAn) musikStarten();
+                // Erst nach dem Stempel setzt die Musik ein
+                setTimeout(() => { if (tonAn) musikStarten(); }, MUSIK_NACH_STEMPEL);
             }, 300);
         });
     }
 
     // Kein Ton gewünscht oder keine Datei: stumm tippen
-    if (!tippton || tonBewusstAus) {
+    if (!tippton || !effekteErlaubt || tonBewusstAus) {
         starten(NORMALES_TEMPO);
         return;
     }
@@ -455,6 +463,7 @@ function akteOeffnen() {
 
     // 1. Ton freischalten – muss direkt im Klick passieren
     if (!tonBewusstAus) {
+        effekteErlaubt = true;
         tonFreischalten(tippton);
         tonFreischalten(stempelton);
         tonFreischalten(musik);
@@ -516,9 +525,8 @@ if (stummKnopf) {
 // ===================================================
 // 6. TON (Musik + Schreibmaschine)
 // ===================================================
-// Der Knopf oben rechts ist von Anfang an da.
-// - Klick auf "Ton an": Musik startet, und der Titel tippt sich
-//   nochmals mit Schreibmaschinen-Ton (Datei, siehe Teil 2).
+// Der Knopf oben rechts schaltet NUR die Musik aus und wieder ein.
+// Der Titel tippt sich dabei nicht neu.
 // - Klick auf "Akte öffnen" (Startbildschirm): Ton geht an, der Titel
 //   tippt mit Schreibmaschinen-Ton, danach setzt die Musik ein.
 // - Klick auf "Ton aus": Musik wird leiser und stoppt, kein Tippen mehr.
@@ -588,7 +596,9 @@ if (tonKnopf) {
             tonBewusstAus = true;
             tonAusschalten();
         } else {
-            tonEinschalten(true, true);
+            // Nur die Musik wieder einschalten – der Titel tippt sich
+            // NICHT nochmals, es gibt keine Soundeffekte.
+            tonEinschalten(false, true);
         }
     });
 }
