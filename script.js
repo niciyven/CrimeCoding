@@ -9,11 +9,20 @@ const FARBE_BEIGE = '#ddd3c0';
 // false = Grafik 2: alle Balken rot
 const ALTER_HERVORHEBEN = true;
 
-// Nur auf schmalen Bildschirmen (Handy): max. Zeichen pro Zeile
-const MAX_ZEICHEN_PRO_ZEILE = 30;
+// Ab dieser Fensterbreite gilt die "grosse" Ansicht
+const BREAKPOINT_GROSS = 900;
 
 // Grosser Bildschirm: Namen, die länger sind, kommen auf 2 Zeilen
 const MAX_ZEICHEN_EINZEILIG = 70;
+
+// Schriftgrösse der Namen in Grafik 1
+const SCHRIFT_GROSS = 13;
+const SCHRIFT_HANDY = 11;
+const ZEILENHOEHE = 1.3;
+
+// Courier ist eine Festbreiten-Schrift: jedes Zeichen ist
+// ca. 0.6 × Schriftgrösse breit (mit etwas Reserve).
+const ZEICHEN_BREITE = 0.62;
 
 Chart.defaults.color = '#d9d2c5';
 Chart.defaults.borderColor = 'rgba(255, 255, 255, 0.08)';
@@ -40,6 +49,10 @@ const balkenAnimation = {
 // Merkt sich pro Grafik die echten Werte
 const echteWerte = new Map();
 
+// Merkt sich pro Grafik eine Funktion, die die Beschriftung
+// an die aktuelle Breite anpasst (nur Grafik 1)
+const anpassungen = new Map();
+
 // Alle Balken auf 0 setzen (ohne Animation)
 function balkenVerstecken(chart) {
     chart.data.datasets.forEach(dataset => {
@@ -64,6 +77,10 @@ const beobachter = new IntersectionObserver(eintraege => {
         if (!chart) return;
 
         if (eintrag.isIntersecting) {
+            // Jetzt ist die Akte offen und die echte Breite messbar
+            const anpassen = anpassungen.get(chart);
+            if (anpassen) anpassen();
+
             balkenZeigen(chart);
         } else {
             balkenVerstecken(chart);
@@ -108,6 +125,29 @@ function nameBereinigen(name) {
     return name.trim().replace(/\)\s*\d+$/, ')');
 }
 
+function istGross() {
+    return window.innerWidth > BREAKPOINT_GROSS;
+}
+
+// Breite der Grafik. Solange die Akte noch zu ist (display: none),
+// ist die echte Breite 0 – dann wird sie aus der Fensterbreite geschätzt.
+function grafikBreite(canvas) {
+    const breite = canvas.parentElement.clientWidth;
+    if (breite > 0) return breite;
+
+    // Abstände auf dem Handy: main 2×16, Kapitel 2×24, Tafel 2×14
+    return Math.max(200, window.innerWidth - 110);
+}
+
+// Wie viele Zeichen passen pro Zeile in die Namen-Spalte?
+// WICHTIG: Chart.js gibt der Y-Achse höchstens die HALBE Breite
+// der Grafik. Alles, was breiter ist, wird links abgeschnitten.
+// Das war der Fehler: 30 Zeichen passten auf dem Handy nicht.
+function maxZeichenProZeile(canvas, schrift) {
+    const platz = grafikBreite(canvas) / 2 - 24;   // 24 = Abstand zu den Balken + Reserve
+    return Math.max(8, Math.floor(platz / (schrift * ZEICHEN_BREITE)));
+}
+
 // Grosser Bildschirm: Sehr lange Namen (z. B. Art. 191 und Art. 197a)
 // werden in der Mitte auf 2 Zeilen aufgeteilt, alle anderen bleiben einzeilig.
 function zweiZeilen(text) {
@@ -146,7 +186,16 @@ function umbrechen(text, maxZeichen) {
     const name = match ? match[1] : text;
     const artikel = match ? match[2] : null;
 
-    const woerter = name.split(' ');
+    // Wörter, die allein schon zu lang sind, mit Bindestrich trennen
+    const woerter = [];
+    name.split(' ').forEach(wort => {
+        while (wort.length > maxZeichen) {
+            woerter.push(wort.slice(0, maxZeichen - 1) + '-');
+            wort = wort.slice(maxZeichen - 1);
+        }
+        if (wort !== '') woerter.push(wort);
+    });
+
     const zeilen = [];
     let zeile = '';
 
@@ -163,6 +212,24 @@ function umbrechen(text, maxZeichen) {
     if (artikel) zeilen.push(artikel);
 
     return zeilen;
+}
+
+// Handy: Höhe der Grafik so wählen, dass jeder Name in seine Zeile
+// passt und nichts überlappt. Chart.js gibt jedem Balken gleich viel
+// Platz – darum zählt der Name mit den meisten Zeilen.
+function grafikHoeheSetzen(canvas, labels, schrift) {
+    const container = canvas.parentElement;
+
+    if (istGross()) {
+        container.style.height = '';   // Höhe aus dem CSS
+        return;
+    }
+
+    const maxZeilen = Math.max(...labels.map(l => Array.isArray(l) ? l.length : 1));
+    const proBalken = maxZeilen * schrift * ZEILENHOEHE + 16;   // 16 = Luft zwischen den Namen
+    const hoehe = labels.length * proBalken + 90;               // 90 = Legende + X-Achse
+
+    container.style.height = Math.max(480, Math.ceil(hoehe)) + 'px';
 }
 
 
@@ -243,20 +310,37 @@ fetch('unload.php')
 
         const namenVoll = sortiert.map(e => e.name);
 
+        const delikteCanvas = document.getElementById('delikteChart');
+
+        // Beschriftung passend zur aktuellen Breite berechnen
         // Grosser Bildschirm: einzeilig, nur sehr lange Namen auf 2 Zeilen
-        // Handy / schmales Fenster: Namen umbrechen
-        const labels = window.innerWidth > 900
-            ? namenVoll.map(name => zweiZeilen(name))
-            : namenVoll.map(name => umbrechen(name, MAX_ZEICHEN_PRO_ZEILE));
+        // Handy / schmales Fenster: Namen so umbrechen, dass sie Platz haben
+        function beschriftungBerechnen() {
+            if (istGross()) {
+                return {
+                    schrift: SCHRIFT_GROSS,
+                    labels: namenVoll.map(name => zweiZeilen(name))
+                };
+            }
+
+            const maxZeichen = maxZeichenProZeile(delikteCanvas, SCHRIFT_HANDY);
+            return {
+                schrift: SCHRIFT_HANDY,
+                labels: namenVoll.map(name => umbrechen(name, maxZeichen))
+            };
+        }
+
+        const start = beschriftungBerechnen();
+        grafikHoeheSetzen(delikteCanvas, start.labels, start.schrift);
 
         const weiblich = sortiert.map(e => e.weiblich);
         const maennlich = sortiert.map(e => e.maennlich);
 
-        animierteGrafik('delikteChart', {
+        const delikteChart = animierteGrafik('delikteChart', {
             type: 'bar',
 
             data: {
-                labels: labels,
+                labels: start.labels,
                 datasets: [
                     {
                         label: 'Weiblich',
@@ -317,12 +401,44 @@ fetch('unload.php')
                         grid: { display: false },
                         ticks: {
                             autoSkip: false,
-                            font: { size: 13, lineHeight: 1.3 },
+                            font: { size: start.schrift, lineHeight: ZEILENHOEHE },
                             padding: 10
                         }
                     }
                 }
             }
+        });
+
+        // Beschriftung neu berechnen (beim Öffnen der Akte und beim Drehen
+        // des Handys / Ändern der Fenstergrösse)
+        function beschriftungAnpassen() {
+            const neu = beschriftungBerechnen();
+
+            // Nur aktualisieren, wenn sich wirklich etwas geändert hat
+            if (JSON.stringify(neu.labels) === JSON.stringify(delikteChart.data.labels) &&
+                delikteChart.options.scales.y.ticks.font.size === neu.schrift) {
+                return;
+            }
+
+            grafikHoeheSetzen(delikteCanvas, neu.labels, neu.schrift);
+            delikteChart.data.labels = neu.labels;
+            delikteChart.options.scales.y.ticks.font.size = neu.schrift;
+            delikteChart.update('none');
+        }
+
+        anpassungen.set(delikteChart, beschriftungAnpassen);
+
+        // Nur auf Breitenänderungen reagieren (auf dem iPhone löst schon
+        // das Scrollen ein "resize" aus, weil die Adressleiste die Höhe ändert)
+        let letzteBreite = window.innerWidth;
+        let resizeTimer;
+
+        window.addEventListener('resize', () => {
+            if (window.innerWidth === letzteBreite) return;
+            letzteBreite = window.innerWidth;
+
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(beschriftungAnpassen, 200);
         });
 
 
